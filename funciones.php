@@ -76,10 +76,26 @@ function procesarCambiosAsignatura() {
 
     if(isset($_GET['operacion'])&&$_GET['operacion']=="eliminar") {
 
-        $codigo = $_GET['asignatura'];
-	    $sql = "DELETE FROM NOTAS.ASIGNATURAS WHERE codigo='$codigo'";
-	    $conn->query( $sql );
+        // encuentra las unidades de la asignatura
 
+        $codigo = $_GET['asignatura'];
+        $sql = "SELECT clave from NOTAS.UNIDADES where asignatura='$codigo'";
+        $result = $conn->query($sql);
+
+        foreach ($result as $row) {
+
+            //$sql2 = "SELECT clave from NOTAS.INSTRUMENTOS where unidad='$row'";
+            $unidad = $row['clave'];
+            $sql2 = "DELETE FROM NOTAS.INSTRUMENTOS where unidad=$unidad";
+            $result2 = $conn->query($sql2);
+            $sql3 = "DELETE FROM NOTAS.UNIDADES where clave=$unidad";
+            $result3 = $conn->query($sql3);
+
+        }
+
+        $sql = "DELETE FROM NOTAS.ASIGNATURAS where codigo=$codigo";
+        $result = $conn->query($sql);
+        
     }
 
     if(isset($_POST['addCodigo'])&&$_POST['addCodigo']!="") {
@@ -144,7 +160,7 @@ function displayUnidades() {
 	        echo "    <TD><INPUT TYPE='text' name='numero[$cont]' value='$fila[2]' size='3'></TD>";
 	        echo "    <TD><INPUT TYPE='text' name='nombre[$cont]' value='$fila[3]' size='40'></TD>";
 	        echo "    <TD><INPUT TYPE='text' name='porcentaje[$cont]' value='$fila[4]' size='5'></TD>";
-	        echo "    <TD><a href='unidades.php?asignatura=$asignatura&operacion=eliminar&unidad=$fila[2]'><img src='iconos/remove32.png'></a></TD>";
+	        echo "    <TD><a href='unidades.php?asignatura=$asignatura&operacion=eliminar&unidad=$fila[0]'><img src='iconos/remove32.png'></a></TD>";
             echo "</TR>";
             
             $cont++;
@@ -171,8 +187,10 @@ function procesarCambiosUnidades() {
     if(isset($_GET['operacion'])&&$_GET['operacion']=="eliminar") {
 
         $unidad = $_GET['unidad'];
-	    $sql = "DELETE FROM NOTAS.UNIDADES WHERE numero='$unidad'";
+	    $sql = "DELETE FROM NOTAS.INSTRUMENTOS WHERE unidad='$unidad'";
 	    $conn->query( $sql );
+        $sql2 = "DELETE FROM NOTAS.UNIDADES WHERE clave='$unidad'";
+        $conn->query( $sql2 );
 
     }
 
@@ -214,7 +232,7 @@ function updateUnidades ($uclave, $unumero, $unombre, $uporcentaje) {
 // INSTRUMENTOS
 
 
-function poblarFormularioInstrumentos($codigoAsignatura) {
+function displayInstrumentos($codigoAsignatura) {
     $conexion = conectar();
     $consulta = "SELECT instrumentos.*, unidades.numero FROM `instrumentos` INNER JOIN unidades on unidades.clave= unidad WHERE unidades.asignatura = '$codigoAsignatura'";
 
@@ -223,7 +241,7 @@ function poblarFormularioInstrumentos($codigoAsignatura) {
 		foreach ($result as $fila) {
             echo "<TR>";
             echo "    <INPUT TYPE='hidden' name='clave[$cont]' value='" . $fila["clave"] . "'>";
-            crearDropdownDeUnidad($codigoAsignatura, $cont, $fila['unidad']);
+            dropdownUnidad($codigoAsignatura, $cont, $fila['unidad']);
             echo "    <TD><INPUT TYPE='text' name='nombre[$cont]' value='" . $fila["nombre"] . "' size='40'></TD>";
             echo "    <TD><INPUT TYPE='number' name='peso[$cont]' value='" . $fila["peso"] . "' size='10'></TD>";
             echo "    <TD><INPUT TYPE='text' name='calificacion[$cont]' value='" . $fila["calificacion"] . "' size='10'></TD>";
@@ -233,7 +251,7 @@ function poblarFormularioInstrumentos($codigoAsignatura) {
         }
         echo "<TR>";
             echo "    <INPUT TYPE='hidden' name='clave[$cont]' value=''>";
-            crearDropdownDeUnidad($codigoAsignatura, $cont, 0);
+            dropdownUnidad($codigoAsignatura, $cont, 0);
             echo "    <TD><INPUT TYPE='text' name='nombre[$cont]' value='' size='40'></TD>";
             echo "    <TD><INPUT TYPE='number' name='peso[$cont]' value='' size='10'></TD>";
             echo "    <TD><INPUT TYPE='text' name='calificacion[$cont]' value='' size='10'></TD>";
@@ -243,7 +261,7 @@ function poblarFormularioInstrumentos($codigoAsignatura) {
     }
 }
 
-function crearDropdownDeUnidad($codigoAsignatura, $cont, $activo) {
+function dropdownUnidad($codigoAsignatura, $cont, $activo) {
     $conexion = conectar();
     $consulta = "SELECT clave, nombre FROM unidades WHERE asignatura = '$codigoAsignatura'";
 
@@ -261,7 +279,7 @@ function crearDropdownDeUnidad($codigoAsignatura, $cont, $activo) {
     echo "</select></td>";
 }
 
-function procesarFormularioInstrumentos($datos) {
+function procesarCambiosInstrumentos($datos) {
     if(!isset($datos["clave"])) {
        return;
     }
@@ -272,9 +290,9 @@ function procesarFormularioInstrumentos($datos) {
 	$pesos = $datos["peso"];
 	$calificaciones = $datos["calificacion"];
 	for($i=0; $i<count($claves); $i++) {
-		actualizarInstrumento($claves[$i], $unidades[$i], $nombres[$i], $pesos[$i], $calificaciones[$i] );
+		updateInstrumento($claves[$i], $unidades[$i], $nombres[$i], $pesos[$i], $calificaciones[$i] );
     }
-    anadirInstrumento($unidades[$i-1], $nombres[$i-1], $pesos[$i-1], $calificaciones[$i-1]);
+    newInstrumento($unidades[$i-1], $nombres[$i-1], $pesos[$i-1], $calificaciones[$i-1]);
 }
 
 function deleteInstrumento() {
@@ -291,18 +309,45 @@ function deleteInstrumento() {
 
 }
 
-function actualizarInstrumento ($clave, $unidad, $nombre, $peso, $calificacion) {
-	$conexion = conectar();
-	$sentencia = "UPDATE instrumentos SET unidad='$unidad', nombre='$nombre', peso='$peso', calificacion='$calificacion' WHERE clave='$clave'";
-    $conexion->query($sentencia);
+function updateInstrumento ($clave, $unidad, $nombre, $peso, $calificacion) {
+	$conn = conectar();
+	$sql = "UPDATE instrumentos SET unidad='$unidad', nombre='$nombre', peso='$peso', calificacion='$calificacion' WHERE clave='$clave'";
+    $conn->query($sql);
 }
 
-function anadirInstrumento($unidad, $nombre, $peso, $calificacion) {
-    $conexion = conectar();
+function newInstrumento($unidad, $nombre, $peso, $calificacion) {
+    $conn = conectar();
     if(!empty($nombre)) {
-	    $sentencia = "INSERT INTO instrumentos (unidad, nombre, peso, calificacion) VALUES ( '$unidad','$nombre', '$peso', '$calificacion')";
-	    $conexion->query($sentencia);   
+	    $sql = "INSERT INTO instrumentos (unidad, nombre, peso, calificacion) VALUES ( '$unidad','$nombre', '$peso', '$calificacion')";
+	    $conn->query($sql);   
     }   
+}
+
+// EXPEDIENTES
+
+function displayExpediente () {
+    $conexion = conectar();
+    $consulta="select codigo, nombre,
+    (select sum((u.porcentaje/100)*
+                (select sum((peso/100)*calificacion)
+                from instrumentos as i
+                where i.unidad=u.clave))
+    from unidades as u
+    where u.asignatura=a.codigo) as notamedia
+    from asignaturas as a";
+    if ($result=mysqli_query($conexion, $consulta)) {
+        $cont=0;
+        while($fila=mysqli_fetch_row($result)){
+            echo "<TR>";
+            echo "  <TD><INPUT type='text' disabled='disabled' name='codigo[$cont]' value='$fila[0]' size='10'></TD>";
+            echo "  <TD><INPUT type='text' disabled='disabled' name='nombre[$cont]' value='$fila[1]' size='40'></TD>";
+            echo "  <TD><INPUT type='text' disabled='disabled' name='nota media[$cont]' value='$fila[2]' size='9'></TD>";
+            echo "<TR>";
+            echo "</TR>";
+            $cont++;
+        }   
+        mysqli_free_result($result);
+     }
 }
 
 ?>

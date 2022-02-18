@@ -14,9 +14,10 @@
 	$nasignatura = $code[0];
 
     if (!empty($_POST)) {
-        procesarFormularioInstrumentos($_POST);
+        procesarCambiosInstrumentos($_POST);
     };
 
+    error_reporting(E_ALL ^ E_NOTICE);
     error_reporting(E_ALL ^ E_WARNING); 
     ?>
 
@@ -39,7 +40,7 @@
                 //var_dump($_GET);
                 //var_dump($_POST);
                 deleteInstrumento();
-                poblarFormularioInstrumentos($asig);               
+                displayInstrumentos($asig);               
             ?>
         </TABLE><br/>
 		<INPUT TYPE="submit" name="procesar" value="Guardar Cambios">
