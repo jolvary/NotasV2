@@ -211,7 +211,7 @@ function updateUnidades ($uclave, $unumero, $unombre, $uporcentaje) {
 
 }
 
-// INSTRUCCIONES
+// INSTRUMENTOS
 
 function displayInstrumentos() {
 
@@ -259,7 +259,7 @@ function displayInstrumentos() {
 
 function procesarCambiosInstrumentos() {
 
-    $conn = conectar();
+    $conn = @conectar();
     $valuenombre = end($_POST["unidad"]);
 
     if(isset($_GET['operacion'])&&$_GET['operacion']=="eliminar") {

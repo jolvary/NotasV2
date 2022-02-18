@@ -18,7 +18,9 @@
 <BODY>
     <center>
 
-    <h1 style="text-align:center;"><img src='iconos/birrete.png'> EXPEDIENTE </h1>
+    <h2><a href="index.php"><div style="float: left">Volver</div></a>
+    <div align="center"><img src='iconos/birrete.png'> EXPEDIENTE </div></h2>
+
     <FORM METHOD=POST ACTION="">
         <TABLE>
 			<TR><TH>Código</TH><TH>Nombre</TH><TH>Nota Media</TH></TR>

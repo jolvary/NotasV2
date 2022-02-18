@@ -30,8 +30,8 @@
         <TABLE>
 			<TR><TH>NÚM</TH><TH>NOMBRE</TH><TH>PESO (%)</TH></TR>
 		    <?php 
-                var_dump($_GET);
-                var_dump($_POST);
+                //var_dump($_GET);
+                //var_dump($_POST);
                 procesarCambiosUnidades();
                 displayUnidades();
                 

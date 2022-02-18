@@ -22,8 +22,8 @@
         <TABLE>
 			<TR><TH>CÓDIGO</TH><TH>NOMBRE</TH><TH>HORAS</TH><TH>PROFESOR</TH></TR>
 		    <?php 
-                var_dump($_GET);
-                var_dump($_POST);
+                //var_dump($_GET);
+                //var_dump($_POST);
                 procesarCambiosAsignatura();
                 displayAsignaturas();
             ?>

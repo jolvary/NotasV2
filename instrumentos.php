@@ -12,6 +12,8 @@
     $nombre = $conn->query($sql);
     $code = mysqli_fetch_row($nombre);
 	$nasignatura = $code[0];
+
+    error_reporting(E_ALL ^ E_WARNING); 
     ?>
 
 <HEAD>
@@ -25,7 +27,7 @@
     <h2><a href="index.php"><div style="float: left">Volver</div></a>
     <div align="center"><?php echo 'Asignatura ', $asig, " : ", $nasignatura;?></div></h2>
 
-    <h1 style="text-align:center;"><img src='iconos/tarta.png'> UNIDADES </h1>
+    <h1 style="text-align:center;"><img src='iconos/smile.png'> INSTRUMENTOS </h1>
     <FORM METHOD=POST ACTION="">
         <TABLE>
 			<TR><TH>Unidad</TH><TH>Nombre del Instrumento</TH><TH>Peso (%)</TH><TH>Calificación</TH></TR>
