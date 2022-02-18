@@ -13,6 +13,10 @@
     $code = mysqli_fetch_row($nombre);
 	$nasignatura = $code[0];
 
+    if (!empty($_POST)) {
+        procesarFormularioInstrumentos($_POST);
+    };
+
     error_reporting(E_ALL ^ E_WARNING); 
     ?>
 
@@ -34,9 +38,8 @@
 		    <?php 
                 //var_dump($_GET);
                 //var_dump($_POST);
-                procesarCambiosInstrumentos();
-                displayInstrumentos();
-                
+                deleteInstrumento();
+                poblarFormularioInstrumentos($asig);               
             ?>
         </TABLE><br/>
 		<INPUT TYPE="submit" name="procesar" value="Guardar Cambios">
